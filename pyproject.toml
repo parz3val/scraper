@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "FloorSheetScraperMeroLagani"
+version = "0.0.1"
+description = "Floorsheet scraper for merolagani.com for different symbolss"
+authors = ["Harris Kunwar <iamtheparzival@gmail.com>"]
+license = "Codavt"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^3.141.0"
+pandas = "^1.2.1"
+lxml = "^4.6.2"
+html5lib = "^1.1"
+bs4 = "^0.0.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
