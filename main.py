@@ -97,7 +97,7 @@ def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
 def symbol_to_csv(shortcode):
     window = get_driver()
     floor_data = symbol_to_frames(shortcode, window)
-    with open(f'{shortcode}.csv', 'w') as file:
+    with open(f'sheets/{shortcode}.csv', 'w') as file:
         floor_data.to_csv(file)
     window.quit()
 
@@ -111,7 +111,7 @@ def runner():
         p.start()
         processes.append(p)
         ctr_flag += 1
-        if i > 2:
+        if i > 5:
             for process in processes:
                 process.join()
             ctr_flag = 1
