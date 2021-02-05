@@ -22,7 +22,7 @@ import rollbar
 # http://merolagani.com/CompanyDetail.aspx?symbol=NLG#0
 
 BASE_URL = "http://merolagani.com/CompanyDetail.aspx?symbol="
-IMP_DELAY = 10
+IMP_DELAY = 7
 
 # Add driver to path
 os.environ["PATH"] += os.pathsep + r'driver'
@@ -84,19 +84,49 @@ def get_pages(intent_block):
 def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
     """ Takes in the symbol and returns floorsheet dataframe """
     search_url: str = f"{BASE_URL}{symbol}"
-    browser_object.get(search_url)
+    try:
+        browser_object.get(search_url)
+    except Exception as ex:
+        rollbar.report_message(str(ex))
     browser_object.implicitly_wait(IMP_DELAY)
     # Click on the nav button
-    browser_object.find_element_by_id("navFloorSheet").click()
+
+    try:
+        browser_object.find_element_by_id("navFloorSheet").click()
+    except Exception as ext:
+        rollbar.report_message(str(ext))
+
     wait()
-    intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
+    try:
+        intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
+    except Exception as exr:
+        rollbar.report_message(str(exr))
+        wait()
+        intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
     frame_block = block_to_frame(intent_block)
-    next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
-    while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"]:
-        next_button.click()
+    try:
+        next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
+    except Exception as extr:
+        rollbar.report_message(str(extr))
         wait()
         next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
-        intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
+
+    while get_pages(intent_block)["current_page"] < get_pages(intent_block)["last_page"]:
+        next_button.click()
+        wait()
+        try:
+            next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
+        except Exception as extd:
+            rollbar.report_message(str(extd))
+            wait()
+            next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
+
+        try:
+            intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
+        except Exception as extf:
+            rollbar.report_message(str(extf))
+            wait()
+            intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
         inter_frame = block_to_frame(intent_block)
         frame_block = pd.concat([frame_block, inter_frame], axis=0)
     return frame_block
@@ -115,11 +145,12 @@ def runner():
         ctr_flag = 1
         processes = []
         sym = symbols[i]
+        rollbar.report_message(f"Working on : {sym}")
         p = multiprocessing.Process(target=symbol_to_csv, args=[sym])
         p.start()
         processes.append(p)
         ctr_flag += 1
-        if i > 5:
+        if i > 3:
             for process in processes:
                 process.join()
             ctr_flag = 1
