@@ -40,6 +40,10 @@ def get_driver():
     if a_driver is None:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
         a_driver = webdriver.Chrome(options=chrome_options)
         setattr(threadLocal, 'driver', a_driver)
     return a_driver
