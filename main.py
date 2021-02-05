@@ -9,7 +9,7 @@ from pandas import DataFrame
 import csv
 import threading
 import multiprocessing
-from multiprocessing import freeze_support
+
 
 # To do :
 # - Recursive Wait
@@ -20,7 +20,7 @@ from multiprocessing import freeze_support
 # http://merolagani.com/CompanyDetail.aspx?symbol=NLG#0
 
 BASE_URL = "http://merolagani.com/CompanyDetail.aspx?symbol="
-IMP_DELAY = 6
+IMP_DELAY = 10
 
 # Add driver to path
 os.environ["PATH"] += os.pathsep + r'driver'
@@ -85,16 +85,14 @@ def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
     intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
     frame_block = block_to_frame(intent_block)
     next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
-    pages = []
-    while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"] and get_pages(intent_block)["current_page"] not in pages:
-        pages.append(int(get_pages(intent_block)["current_page"]))
+    while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"]:
+        print(int(get_pages(intent_block)["current_page"]))
         next_button.click()
         wait()
         next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
         intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
         inter_frame = block_to_frame(intent_block)
         frame_block = pd.concat([frame_block, inter_frame], axis=0)
-    pages = []
     return frame_block
 
 
