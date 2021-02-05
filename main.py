@@ -9,6 +9,8 @@ from pandas import DataFrame
 import csv
 import threading
 import multiprocessing
+import rollbar
+
 
 
 # To do :
@@ -33,6 +35,8 @@ with open('ss.csv', "r") as symbols_file:
     symbols = [row["Symbol"] for row in csv.DictReader(symbols_file)]
 
 threadLocal = threading.local()
+rollbar.init('d80aab892f46407f9018bac76bf108a7')
+rollbar.report_message('Rollbar is configured correctly')
 
 
 def get_driver():
@@ -55,8 +59,11 @@ def block_to_frame(intent_block) -> DataFrame:
     Finds the tables in the block
     :returns : first table frame
     """
-    html_table = intent_block.find_element_by_tag_name("table")
-    return pd.read_html(str(html_table.get_attribute("outerHTML")))[0]
+    try:
+        html_table = intent_block.find_element_by_tag_name("table")
+        return pd.read_html(str(html_table.get_attribute("outerHTML")))[0]
+    except Exception as e:
+        rollbar.report_message(str(e))
 
 
 def wait():
@@ -86,7 +93,6 @@ def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
     frame_block = block_to_frame(intent_block)
     next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
     while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"]:
-        print(int(get_pages(intent_block)["current_page"]))
         next_button.click()
         wait()
         next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
