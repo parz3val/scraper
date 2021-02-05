@@ -57,6 +57,14 @@ htmlsoup = ["beautifulsoup4"]
 source = ["Cython (>=0.29.7)"]
 
 [[package]]
+name = "multiprocessing"
+version = "2.6.2.1"
+description = "Backport of the multiprocessing package to Python 2.4 and 2.5"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "numpy"
 version = "1.20.0"
 description = "NumPy is the fundamental package for array computing with Python."
@@ -150,7 +158,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "a76fb820b92075ce15f8c8bde9360084320abce2e8ec7f473df181639a78ee3e"
+content-hash = "124516db7474427a182525ca263d31971da5a589b2bf6ca27a556b5a6f4930f9"
 
 [metadata.files]
 beautifulsoup4 = [
@@ -203,6 +211,13 @@ lxml = [
     {file = "lxml-4.6.2-cp39-cp39-win32.whl", hash = "sha256:2e6fd1b8acd005bd71e6c94f30c055594bbd0aa02ef51a22bbfa961ab63b2d75"},
     {file = "lxml-4.6.2-cp39-cp39-win_amd64.whl", hash = "sha256:535332fe9d00c3cd455bd3dd7d4bacab86e2d564bdf7606079160fa6251caacf"},
     {file = "lxml-4.6.2.tar.gz", hash = "sha256:cd11c7e8d21af997ee8079037fff88f16fda188a9776eb4b81c7e4c9c0a7d7fc"},
+]
+multiprocessing = [
+    {file = "multiprocessing-2.6.2.1-py2.4-win32.egg", hash = "sha256:d5f56e123606e8bc792164fe7bd12a5657533f1b936abb65b48385a8d8193176"},
+    {file = "multiprocessing-2.6.2.1-py2.5-win32.egg", hash = "sha256:109f4c89ea5c80814817d6636be5e1ec01f8567fdff84ea058ceeae46dbe4bd3"},
+    {file = "multiprocessing-2.6.2.1.tar.gz", hash = "sha256:ef3b81ad85d7de252e5491b1daac028e17f9741cbe3625032e6eaa4ad4c79900"},
+    {file = "multiprocessing-2.6.2.1.win32-py2.4.exe", hash = "sha256:3e74e3d6a4df52299392498b85427f3eb6d3f93d249d8ba649fe6a2135b3a73d"},
+    {file = "multiprocessing-2.6.2.1.win32-py2.5.exe", hash = "sha256:b6369e44b62543b1be3afdbb4c1c2d9b1b290a7ed67c6a20f8fd014b5b727760"},
 ]
 numpy = [
     {file = "numpy-1.20.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:89bd70c9ad540febe6c28451ba225eb4e49d27f64728357f512c808002325dfa"},
