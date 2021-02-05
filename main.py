@@ -7,7 +7,9 @@ import os
 import pandas as pd
 from pandas import DataFrame
 import csv
-
+import threading
+import multiprocessing
+from multiprocessing import freeze_support
 
 # To do :
 # - Recursive Wait
@@ -18,17 +20,29 @@ import csv
 # http://merolagani.com/CompanyDetail.aspx?symbol=NLG#0
 
 BASE_URL = "http://merolagani.com/CompanyDetail.aspx?symbol="
-IMP_DELAY = 10
+IMP_DELAY = 6
 
 # Add driver to path
 os.environ["PATH"] += os.pathsep + r'driver'
 
 # Initialize the driver object
-driver = webdriver.Chrome()
+# driver = webdriver.Chrome()
 
 # Load symbols
 with open('ss.csv', "r") as symbols_file:
     symbols = [row["Symbol"] for row in csv.DictReader(symbols_file)]
+
+threadLocal = threading.local()
+
+
+def get_driver():
+    a_driver = getattr(threadLocal, 'driver', None)
+    if a_driver is None:
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")
+        a_driver = webdriver.Chrome(options=chrome_options)
+        setattr(threadLocal, 'driver', a_driver)
+    return a_driver
 
 
 def block_to_frame(intent_block) -> DataFrame:
@@ -65,33 +79,44 @@ def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
     browser_object.find_element_by_id("navFloorSheet").click()
     wait()
     intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
-    next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
     frame_block = block_to_frame(intent_block)
-    i = 0
-    while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"]:
-        i += 1
-        print(i)
+    next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
+    pages = []
+    while get_pages(intent_block)["current_page"] <= get_pages(intent_block)["last_page"] and get_pages(intent_block)["current_page"] not in pages:
+        pages.append(int(get_pages(intent_block)["current_page"]))
         next_button.click()
         wait()
         next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
         intent_block = browser_object.find_element_by_id("ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet")
         inter_frame = block_to_frame(intent_block)
         frame_block = pd.concat([frame_block, inter_frame], axis=0)
-
-        # For running in short steps
-        if i > 4:
-            break
+    pages = []
     return frame_block
 
 
-j = 0
-for sym in symbols:
-    # symbol shorts
-    j += 1
-    if j > 2:
-        break
-    df = symbol_to_frames(sym, driver)
-    with open(f'{sym}.csv', 'w') as f:
-        df.to_csv(f)
+def symbol_to_csv(shortcode):
+    window = get_driver()
+    floor_data = symbol_to_frames(shortcode, window)
+    with open(f'{shortcode}.csv', 'w') as file:
+        floor_data.to_csv(file)
+    window.quit()
 
-driver.quit()
+
+def runner():
+    for i in range(len(symbols)):
+        ctr_flag = 1
+        processes = []
+        sym = symbols[i]
+        p = multiprocessing.Process(target=symbol_to_csv, args=[sym])
+        p.start()
+        processes.append(p)
+        ctr_flag += 1
+        if i > 2:
+            for process in processes:
+                process.join()
+            ctr_flag = 1
+            processes = []
+
+
+if __name__ == "__main__":
+    runner()
