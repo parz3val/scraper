@@ -112,6 +112,7 @@ def symbol_to_frames(symbol: str, browser_object: webdriver) -> DataFrame:
         next_button = browser_object.find_element_by_xpath("//a[@title='Next Page']")
 
     while get_pages(intent_block)["current_page"] < get_pages(intent_block)["last_page"]:
+        rollbar.report_message(f"On the page: {get_pages(intent_block)['current_page']} for {symbol}")
         next_button.click()
         wait()
         try:
@@ -139,7 +140,7 @@ def symbol_to_csv(shortcode):
         floor_data.to_csv(file)
     window.quit()
 
-
+"""
 def runner():
     for i in range(len(symbols)):
         ctr_flag = 1
@@ -155,6 +156,13 @@ def runner():
                 process.join()
             ctr_flag = 1
             processes = []
+"""
+
+
+def runner():
+    for sym in symbols:
+        rollbar.report_message(f"Working on {sym}")
+        symbol_to_csv(sym)
 
 
 if __name__ == "__main__":
