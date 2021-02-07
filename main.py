@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException as E
+from selenium.webdriver.common.keys import Keys
 
 # from multiprocessing.pool import ThreadPool
 
@@ -28,10 +29,11 @@ from selenium.common.exceptions import TimeoutException as E
 
 BASE_URL = "http://merolagani.com/CompanyDetail.aspx?symbol="
 IMP_DELAY = 5
-TIMEOUT = 30
+TIMEOUT = 60
 page_block_id = (
     "ctl00_ContentPlaceHolder1_CompanyDetail1_PagerControlFloorsheet1_litRecords"
 )
+nav_a = "ctl00_ContentPlaceHolder1_CompanyDetail1_btnFloorsheetTab"
 DIV_ID = "ctl00_ContentPlaceHolder1_CompanyDetail1_divDataFloorsheet"
 table_id = "/html/body/form/div[4]/div[6]/div/div/div/div[5]/div[2]/div[2]/table/tbody/tr[2]/td[1]"
 # Add driver to path
@@ -121,12 +123,8 @@ def symbol_to_csv(symbol: str, browser_object: webdriver):
     """ Takes in the symbol and returns floorsheet dataframe """
     search_url: str = f"{BASE_URL}{symbol}"
     browser_object.get(search_url)
-    # Click on the nav button
-    elm = browser_object.find_element_by_id("navFloorSheet")
-    browser_object.implicitly_wait(2)
-    #print(elm.get_attribute("innerHTML"))
-    elm.submit()
     # Wait until data is loaded
+    browser_object.find_element_by_id("navFloorSheet").click()
     is_table_loaded(browser_object, "1")
     intent_block = browser_object.find_element_by_id(DIV_ID)
     frame_block = block_to_frame(intent_block)
